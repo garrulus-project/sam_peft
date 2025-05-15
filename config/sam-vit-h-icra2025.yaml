@@ -1,0 +1,42 @@
+base_config: &base
+  output: "./logs/garrulus"
+  dataset: "garrulus"
+  num_classes: 5
+  max_epochs: 50
+  batch_size: 4
+  n_gpu: 1
+  deterministic: true
+  base_lr: 0.005
+  img_size: 512
+  seed: 125
+  sam_ckpt: "checkpoints/sam/sam_vit_h_4b8939.pth"
+  ### THIS WILL MAKE THE PERFORMANCE WORSE IF ENABLED, USE SGD INSTEAD
+  AdamW: false
+  dice_param: 0.8
+  lr_exp: 0.9
+  tf32: false
+  use_amp: false
+  save_interval: 5
+  use_dense_embeddings: false
+  high_res_upsampling: false
+
+# peft methods config
+peft:
+  adapter_h:
+    <<: *base
+    middle_dim: 32
+    scaling_factor: 0.1
+    peft_ckpt: null
+  # based on AdaptMLP
+  adapter_l:
+    <<: *base
+    middle_dim: 32
+    scaling_factor: 0.1
+    peft_ckpt: null
+  lora:
+    <<: *base
+    rank: 4
+    peft_ckpt: null
+  sam_decoder:
+    <<: *base
+    peft_ckpt: null
