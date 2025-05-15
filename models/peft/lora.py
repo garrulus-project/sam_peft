@@ -64,9 +64,7 @@ class LoRASAM(nn.Module):
         if lora_layer:
             self.lora_layer = lora_layer
         else:
-            self.lora_layer = list(
-                range(len(sam_model.image_encoder.blocks))
-            ) 
+            self.lora_layer = list(range(len(sam_model.image_encoder.blocks)))
 
         # initialize LoRA matrices AB
         self.w_As = []

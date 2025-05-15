@@ -181,7 +181,7 @@ def get_train_val(
     #     K.RandomRotation(degrees=90, p=1.0),
     #     K.Normalize(mean=torch.tensor(0), std=torch.tensor(255)),
     #     data_keys=None,
-    # )    
+    # )
     # val_transform = K.AugmentationSequential(
     #     K.Resize(img_size),
     #     K.Normalize(mean=torch.tensor(0), std=torch.tensor(255)),

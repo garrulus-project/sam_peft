@@ -25,7 +25,6 @@ class AdaptMLP(nn.Module):
         self.scaling = scaling
 
     def forward(self, x):
-
         mlp_out = self.mlp(x)
         adapter = self.up_fn(self.act(self.down_fn(x)))
         out = self.scaling * adapter + mlp_out
@@ -53,7 +52,6 @@ class AdapterAttention(nn.Module):
         self.shortcut = True
 
     def forward(self, x):
-
         attn_out = self.attn(x)
         out = attn_out + self.up_fn(self.act(self.down_fn(attn_out)))
 

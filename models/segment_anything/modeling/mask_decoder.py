@@ -145,7 +145,7 @@ class MaskDecoder(nn.Module):
         # Concatenate output tokens size = [n_class + 1(additional mask) + 1(iou), 256], [7,256]
         output_tokens = torch.cat(
             [self.iou_token.weight, self.mask_tokens.weight], dim=0
-        )  
+        )
         # [1, 7, 256]
         output_tokens = output_tokens.unsqueeze(0).expand(
             sparse_prompt_embeddings.size(0), -1, -1

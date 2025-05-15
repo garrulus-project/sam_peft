@@ -25,7 +25,6 @@ class AdaptMLP(nn.Module):
         self.scaling = scaling
 
     def forward(self, x):
-
         mlp_out = self.mlp(x)
         adapter = self.up_fn(self.act(self.down_fn(x)))
         out = self.scaling * adapter + mlp_out
@@ -53,7 +52,6 @@ class AdapterAttention(nn.Module):
         self.shortcut = True
 
     def forward(self, x):
-
         attn_out = self.attn(x)
         out = attn_out + self.up_fn(self.act(self.down_fn(attn_out)))
 
@@ -78,9 +76,7 @@ class AdapterSAM(nn.Module):
         assert middle_dim > 0
 
         # Only apply adapter to the image encoder by default
-        self.adapter_layer = list(
-            range(len(sam_model.image_encoder.blocks))
-        )  
+        self.adapter_layer = list(range(len(sam_model.image_encoder.blocks)))
 
         # Initialize the adapter layers
         self.w_down_mlp = []
@@ -100,7 +96,6 @@ class AdapterSAM(nn.Module):
         for t_layer_i, blk in enumerate(sam_model.image_encoder.blocks):
             if t_layer_i not in self.adapter_layer:
                 continue
-            atten = blk.attn
             mlp = blk.mlp
             self.dim = blk.attn.qkv.in_features
             w_down_linear_mlp = nn.Linear(self.dim, middle_dim, bias=True)
