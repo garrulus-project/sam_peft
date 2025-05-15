@@ -162,10 +162,6 @@ def get_train_val(
 
     train_polygon = train_polygon + validation_polygon
 
-    # img_size = 1024
-    # sample_window_size = 200
-    # batch_size = 1 # set to 1 since sam can only infere one image (due to gpu res)
-
     # set the same value for min and max to produce consisten window size
     size_lims = (img_size, img_size)
     if min_window_res is not None:
@@ -177,7 +173,20 @@ def get_train_val(
         data_keys=None,
     )
 
-    # from geo_gdl_utils import GarrulusSegmentationDatasetNew, combine_sam_predicted_mask
+    ## ToDo: update gdl to handle different transform
+    # train_transform = K.AugmentationSequential(
+    #     K.Resize(img_size),
+    #     K.RandomHorizontalFlip(p=1.0),
+    #     K.RandomVerticalFlip(p=1.0),
+    #     K.RandomRotation(degrees=90, p=1.0),
+    #     K.Normalize(mean=torch.tensor(0), std=torch.tensor(255)),
+    #     data_keys=None,
+    # )    
+    # val_transform = K.AugmentationSequential(
+    #     K.Resize(img_size),
+    #     K.Normalize(mean=torch.tensor(0), std=torch.tensor(255)),
+    #     data_keys=None,
+    # )
 
     # create Garrulus segmentation dataset
     gsd = GarrulusSegmentationDatasetNew(
