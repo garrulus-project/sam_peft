@@ -24,79 +24,19 @@ from models.peft import (
     sam_decoder,
 )
 
-from utils import calc_loss, get_sam_model_reg_key, create_logging
-
+from utils import (
+    calc_loss,
+    get_sam_model_reg_key,
+    create_logging
+    get_model,
+    get_dataset
+)
 from torch.optim.lr_scheduler import CosineAnnealingLR
-
-
 from dataset.garrulus import get_train_val
 from utils import LinearWarmupLR
 
+# multimasks output always True in this exp
 multimask_output = True
-
-
-def get_model(cfg, logging, device):
-    sam_registry_key = get_sam_model_reg_key(cfg["sam_ckpt"])
-    sam, img_embedding_size = sam_model_registry[sam_registry_key](
-        image_size=cfg["img_size"],
-        num_classes=cfg["num_classes"],
-        checkpoint=cfg["sam_ckpt"],
-        pixel_mean=[0, 0, 0],
-        pixel_std=[1, 1, 1],
-        high_res_upsampling=cfg["high_res_upsampling"],
-    )
-
-    # _de -> with dense embedding
-    de = cfg["use_dense_embeddings"]
-    if cfg["peft"] == "adapter_h":
-        model = adapter_h.AdapterSAM(
-            sam, cfg["middle_dim"], cfg["scaling_factor"], use_dense_embeddings=de
-        ).to(device)
-    elif cfg["peft"] == "adapter_l":
-        model = adapter_l.AdapterSAM(
-            sam, cfg["middle_dim"], cfg["scaling_factor"], use_dense_embeddings=de
-        ).to(device)
-    elif cfg["peft"] == "lora":
-        model = lora.LoRASAM(sam, cfg["rank"], use_dense_embeddings=de).to(device)
-    elif cfg["peft"] == "sam_decoder":
-        model = sam_decoder.SAMDecoder(sam, use_dense_embeddings=de).to(device)
-        print("Updating decoder only")
-
-    if cfg["peft_ckpt"] is not None:
-        model.load_peft_parameters(cfg["peft_ckpt"])
-
-    model.to(device)
-
-    total_params = sum(p.numel() for p in model.parameters())
-    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-    logging.info(f"Total number of parameters:{total_params}")
-    logging.info(f"Total number of trainable parameters:{trainable_params}")
-
-    return model
-
-
-def get_dataset(cfg):
-    if cfg["dataset"] == "garrulus":
-        # ToDo: worker_init_fn does not work, and effect the loss?
-        # sampling and label missmatch????
-        if "min_window_res" in cfg.keys():
-            min_window_res = cfg["min_window_res"]
-        else:
-            min_window_res = None
-
-        dataset, trainloader, valloader = get_train_val(
-            batch_size=cfg["batch_size"],
-            img_size=cfg["img_size"],
-            worker_init_fn=None,
-            seed=cfg["seed"],
-            min_window_res=min_window_res,
-        )
-    else:
-        raise ValueError("Dataset not recognized")
-
-    return dataset, trainloader, valloader
-
 
 def train(cfg):
     device = torch.device("cuda", cfg["cuda"])
@@ -306,12 +246,12 @@ if __name__ == "__main__":
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
 
-    if not cfg["deterministic"]:
-        cudnn.benchmark = True
-        cudnn.deterministic = False
-    else:
+    if cfg["deterministic"]:
         cudnn.benchmark = False
         cudnn.deterministic = True
+    else:
+        cudnn.benchmark = True
+        cudnn.deterministic = False
 
     random.seed(cfg["seed"])
     np.random.seed(cfg["seed"])
