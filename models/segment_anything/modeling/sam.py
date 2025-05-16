@@ -154,9 +154,9 @@ class Sam(nn.Module):
                 image_embeddings=curr_embedding.unsqueeze(0),
                 image_pe=self.prompt_encoder.get_dense_pe(),
                 sparse_prompt_embeddings=sparse_embeddings,
-                dense_prompt_embeddings=dense_embeddings
-                if use_dense_embeddings
-                else None,
+                dense_prompt_embeddings=(
+                    dense_embeddings if use_dense_embeddings else None
+                ),
                 multimask_output=multimask_output,
             )
             masks = self.postprocess_masks(

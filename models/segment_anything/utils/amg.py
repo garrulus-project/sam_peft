@@ -21,15 +21,15 @@ class MaskData:
 
     def __init__(self, **kwargs) -> None:
         for v in kwargs.values():
-            assert isinstance(v, (list, np.ndarray, torch.Tensor)), (
-                "MaskData only supports list, numpy arrays, and torch tensors."
-            )
+            assert isinstance(
+                v, (list, np.ndarray, torch.Tensor)
+            ), "MaskData only supports list, numpy arrays, and torch tensors."
         self._stats = dict(**kwargs)
 
     def __setitem__(self, key: str, item: Any) -> None:
-        assert isinstance(item, (list, np.ndarray, torch.Tensor)), (
-            "MaskData only supports list, numpy arrays, and torch tensors."
-        )
+        assert isinstance(
+            item, (list, np.ndarray, torch.Tensor)
+        ), "MaskData only supports list, numpy arrays, and torch tensors."
         self._stats[key] = item
 
     def __delitem__(self, key: str) -> None:
@@ -96,9 +96,9 @@ def box_xyxy_to_xywh(box_xyxy: torch.Tensor) -> torch.Tensor:
 
 
 def batch_iterator(batch_size: int, *args) -> Generator[List[Any], None, None]:
-    assert len(args) > 0 and all(len(a) == len(args[0]) for a in args), (
-        "Batched iteration must have inputs of all the same size."
-    )
+    assert len(args) > 0 and all(
+        len(a) == len(args[0]) for a in args
+    ), "Batched iteration must have inputs of all the same size."
     n_batches = len(args[0]) // batch_size + int(len(args[0]) % batch_size != 0)
     for b in range(n_batches):
         yield [arg[b * batch_size : (b + 1) * batch_size] for arg in args]
@@ -126,7 +126,9 @@ def mask_to_rle_pytorch(tensor: torch.Tensor) -> List[Dict[str, Any]]:
     max_elements_per_chunk = 2**31 - 1
 
     if total_elements < max_elements_per_chunk:
-        change_indices = diff.nonzero()  # the tensor is < 32 bit so we find the change indices in a single torch call.
+        change_indices = (
+            diff.nonzero()
+        )  # the tensor is < 32 bit so we find the change indices in a single torch call.
     else:
         # Calculate the number of chunks needed
         num_chunks = total_elements // max_elements_per_chunk
