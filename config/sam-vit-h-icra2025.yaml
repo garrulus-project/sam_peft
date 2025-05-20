@@ -1,6 +1,6 @@
 base_config: &base
   output: "./logs/garrulus"
-  dataset: "garrulus"
+  dataset: "garrulus_icra"
   num_classes: 5
   max_epochs: 50
   batch_size: 4
