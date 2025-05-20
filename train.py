@@ -3,40 +3,34 @@ import os
 import random
 import numpy as np
 import yaml
+from tqdm import tqdm
+import logging
 
 import torch
 import torch.backends.cudnn as cudnn
-from models.segment_anything import sam_model_registry
-
-import logging
 
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn.modules.loss import CrossEntropyLoss
-from tqdm import tqdm
-from utils import DiceLoss
-from utils import evaluate
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.utils.data import DataLoader
 
-from models.peft import (
-    adapter_h,
-    adapter_l,
-    lora,
-    sam_decoder,
-)
-
+from torchgeo.datasets import stack_samples
+from dataset.garrulus import GarrulusDatasetICRA
 from utils import (
+    LinearWarmupLR,
+    DiceLoss,
+    evaluate,
     calc_loss,
-    get_sam_model_reg_key,
     create_logging,
     get_model,
-    get_dataset
+    get_dataset,
 )
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from dataset.garrulus import get_train_val
-from utils import LinearWarmupLR
+
 
 # multimasks output always True in this exp
 multimask_output = True
+
 
 def train(cfg):
     device = torch.device("cuda", cfg["cuda"])
@@ -44,11 +38,38 @@ def train(cfg):
     snapshot_path, loggig = create_logging(cfg)
     model = get_model(cfg, logging, device)
 
-    gsd, trainloader, valloader = get_dataset(cfg)
+    # for ICRA2025 dataset, it's loaded from already-generated samples
+    # saved in tensor files
+    if cfg["dataset"] == "garrulus_icra":
+        train_dataset = GarrulusDatasetICRA(
+            sampled_dataset_path="./sampled_train_data.pt"
+        )
+        trainloader = DataLoader(
+            train_dataset,
+            batch_size=cfg["batch_size"],
+            collate_fn=stack_samples,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True,
+        )
+        val_dataset = GarrulusDatasetICRA(sampled_dataset_path="./sampled_test_data.pt")
+        valloader = DataLoader(
+            val_dataset,
+            batch_size=cfg["batch_size"],
+            collate_fn=stack_samples,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True,
+        )
+        logging.warning("Using Garrulus ICRA 2025 dataset which is pre-generated....")
+    elif cfg["dataset"] == "garrulus":
+        gsd, trainloader, valloader = get_dataset(cfg)
+    else:
+        raise ValueError("Dataset not implemented...")
 
     base_lr = cfg["base_lr"]
     num_classes = cfg["num_classes"]
-    cfg["batch_size"] * cfg["n_gpu"]
+    # batch_size = cfg["batch_size"] * cfg["n_gpu"]
 
     if cfg["n_gpu"] > 1:
         # easier but less efficient, see train_distributed.py (WIP) for more scalability training
@@ -56,7 +77,6 @@ def train(cfg):
 
     # define loss
     ce_loss = CrossEntropyLoss()
-    # dice_loss = DiceLoss(num_classes + 1)
     dice_loss = DiceLoss(num_classes)
 
     # filter optimizer to performs updates on params with requires_grad only
