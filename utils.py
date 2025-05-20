@@ -59,10 +59,10 @@ class DiceLoss(nn.Module):
         if weight is None:
             weight = [1] * self.n_classes
 
-        assert (
-            inputs.size() == target.size()
-        ), "inputs {} & target {} shape do not match".format(
-            inputs.size(), target.size()
+        assert inputs.size() == target.size(), (
+            "inputs {} & target {} shape do not match".format(
+                inputs.size(), target.size()
+            )
         )
         # class_wise_dice = []
         loss = 0.0
