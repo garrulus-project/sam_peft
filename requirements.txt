@@ -1,0 +1,4 @@
+git+https://github.com/garrulus-project/gdl.git@ee90b3a
+torchmetrics==1.5.0
+tqdm
+matplotlib
