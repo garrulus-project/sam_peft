@@ -4,6 +4,16 @@ This is the official implementation of our paper **"Parameter-Efficient Fine-Tun
 
 ## Requirements
 
+* Create conda env and activate
+  ```
+  conda create -n myenv python=3.11
+  conda activate myenv
+  ```
+* Install dependencies
+  ```
+  pip install -r requirements.txt
+  ```
+
 ## Dataset
 
 ## Training
