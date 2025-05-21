@@ -328,7 +328,7 @@ class GarrulusDatasetICRA:
     def __len__(self):
         return self.length
 
-    def plot_sample(
+    def plot(
         self,
         sample,
         show_mask=True,
