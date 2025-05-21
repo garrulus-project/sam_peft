@@ -42,7 +42,7 @@ def train(cfg):
     # saved in tensor files
     if cfg["dataset"] == "garrulus_icra":
         train_dataset = GarrulusDatasetICRA(
-            sampled_dataset_path="./sampled_train_data.pt"
+            sampled_dataset_path=".garrulus_dataset/sampled_train_data.pt"
         )
         trainloader = DataLoader(
             train_dataset,
@@ -52,7 +52,7 @@ def train(cfg):
             num_workers=4,
             pin_memory=True,
         )
-        val_dataset = GarrulusDatasetICRA(sampled_dataset_path="./sampled_test_data.pt")
+        val_dataset = GarrulusDatasetICRA(sampled_dataset_path=".garrulus_dataset/sampled_test_data.pt")
         valloader = DataLoader(
             val_dataset,
             batch_size=cfg["batch_size"],

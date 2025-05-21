@@ -37,7 +37,7 @@ def main(cfg):
     # for ICRA2025 dataset, it's loaded from already-generated samples
     # saved in tensor files
     if cfg["dataset"] == "garrulus_icra":
-        val_dataset = GarrulusDatasetICRA(sampled_dataset_path="./sampled_test_data.pt")
+        val_dataset = GarrulusDatasetICRA(sampled_dataset_path=".garrulus_dataset/sampled_test_data.pt")
         valloader = DataLoader(
             val_dataset,
             batch_size=1,
